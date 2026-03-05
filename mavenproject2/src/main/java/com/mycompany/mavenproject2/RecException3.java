@@ -6,14 +6,16 @@ package com.mycompany.mavenproject2;
 
 /**
  *
- * @author 1
+ * @author student
  */
-public class RecException extends Exception{
+public class RecException3 extends Exception{
     private double value;
+    private double value2;
     public double getNumber(){return value;}
-    public RecException(String message, double num){
+    public double getNumber2(){return value2;}
+    public RecException3(String message, double num,double num2){
         super(message);
         value = num;
+        value2=num2;
     }
 }
-

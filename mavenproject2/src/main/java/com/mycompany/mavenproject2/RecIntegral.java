@@ -19,10 +19,12 @@ public class RecIntegral {
     }
 
     // Конструктор с параметрами и проверкой
-    public RecIntegral(Double upp, Double down, Double step) throws RecException {
+    public RecIntegral(Double upp, Double down, Double step) throws RecException, RecException2,RecException3 {
         check(upp, "Верхний порог");
         check(down, "Нижний порог");
         check(step, "Шаг");
+        check(upp,down,step);
+        check(upp,down);
         this.upp = upp;
         this.down = down;
         this.step = step;
@@ -34,8 +36,19 @@ public class RecIntegral {
         if (value < 0.000001 || value > 1000000) {
             throw new RecException(paramName + " вне диапазона!", value);
         }
+        
     }
-
+    private static void check(double upp,double down,double step) throws RecException2 {
+        if (down-upp<step) {
+            throw new RecException2("Шаг больше интервала!",step);
+        }
+    }
+    private static void check(double upp,double down) throws RecException3 {
+        if (down>upp) {
+            throw new RecException3(" Верхний диапазон меньше нижнего!", upp,down);
+        }
+        
+    }
     // Публичный метод расчёта интеграла методом трапеций
     public double calculateIntegralTrapezoidal() {
         if (step == null || upp == null || down == null || step <= 0 || down >= upp) {
