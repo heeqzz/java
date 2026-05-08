@@ -1,21 +1,23 @@
 package com.mycompany.mavenproject2;
+
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 /**
- * Класс, описывающий одну запись для расчёта интеграла
- * @author 1
+ * Класс, описывающий одну запись для расчёта интеграла.
+ * Реализует логику многопоточного вычисления интеграла методом трапеций.
  */
 public class RecIntegral implements Serializable {
     private static final long serialVersionUID = 1L;
-    private Double upp;      // Верхний предел
-    private Double down;     // Нижний предел
-    private Double step;     // Шаг интегрирования
-    private Double res;      // Результат вычисления
+    private static final Logger logger = Logger.getLogger(RecIntegral.class.getName());
 
-    // Конструктор по умолчанию
+    private Double upp;
+    private Double down;
+    private Double step;
+    private Double res;
+
     public RecIntegral() {}
 
-    // Конструктор с параметрами и проверкой
     public RecIntegral(Double upp, Double down, Double step) throws RecException, RecException2, RecException3 {
         check(upp, "Верхний порог");
         check(down, "Нижний порог");
@@ -28,26 +30,24 @@ public class RecIntegral implements Serializable {
         this.res = null;
     }
 
-    // === Методы проверки ===
     private static void check(double value, String paramName) throws RecException {
         if (value < 0.000001 || value > 1000000) {
             throw new RecException(paramName + " вне диапазона!", value);
         }
     }
-    
+
     private static void checkInterval(double upp, double down, double step) throws RecException2 {
         if (upp - down < step) {
             throw new RecException2("Шаг больше интервала!", step);
         }
     }
-    
+
     private static void checkOrder(double upp, double down) throws RecException3 {
         if (down > upp) {
             throw new RecException3("Верхний диапазон меньше нижнего!", upp, down);
         }
     }
 
-    // === Однопоточный расчёт (метод трапеций) ===
     public double calculateIntegralTrapezoidal() {
         if (step == null || upp == null || down == null || step <= 0 || down >= upp) {
             return 0.0;
@@ -55,34 +55,34 @@ public class RecIntegral implements Serializable {
         return calculateTrapezoidalSegment(down, upp, step);
     }
 
-    // === Многопоточный расчёт: 6 потоков через Runnable ===
+    /**
+     * Вычисляет интеграл на заданном интервале, разбивая его на 6 частей
+     * и обрабатывая каждую часть в отдельном потоке.
+     */
     public double calculateIntegralParallel6Threads() {
         if (step == null || upp == null || down == null || step <= 0 || down >= upp) {
             return 0.0;
         }
-
+        
         double a = down;
         double b = upp;
         double h = step;
         final int THREAD_COUNT = 6;
-        
-        // Разбиваем интервал на 6 частей
+
         double segmentSize = (b - a) / THREAD_COUNT;
-        
+
         IntegralTask[] tasks = new IntegralTask[THREAD_COUNT];
         Thread[] threads = new Thread[THREAD_COUNT];
 
-        // Создаём и запускаем потоки
         for (int i = 0; i < THREAD_COUNT; i++) {
             double start = a + i * segmentSize;
             double end = (i == THREAD_COUNT - 1) ? b : a + (i + 1) * segmentSize;
-            
+
             tasks[i] = new IntegralTask(start, end, h);
             threads[i] = new Thread(tasks[i], "Integral-Thread-" + i);
             threads[i].start();
         }
 
-        // Ждём завершения всех потоков и суммируем результаты
         double totalResult = 0.0;
         for (int i = 0; i < THREAD_COUNT; i++) {
             try {
@@ -97,7 +97,6 @@ public class RecIntegral implements Serializable {
         return totalResult;
     }
 
-    // Вспомогательный метод: расчёт интеграла на отрезке [start, end] методом трапеций
     private static double calculateTrapezoidalSegment(double start, double end, double step) {
         double a = start;
         double h = step;
@@ -109,8 +108,7 @@ public class RecIntegral implements Serializable {
             sum += h * (y1 + y2) / 2.0;
             a += h;
         }
-        
-        // Обрабатываем остаток, если конец интервала не кратен шагу
+
         if (a < end) {
             double remainder = end - a;
             double y1 = Math.sqrt(a);
@@ -120,7 +118,6 @@ public class RecIntegral implements Serializable {
         return sum;
     }
 
-    // === Внутренний класс задачи для потока ===
     private static class IntegralTask implements Runnable {
         private final double start;
         private final double end;
@@ -144,28 +141,21 @@ public class RecIntegral implements Serializable {
         }
     }
 
-    // === Геттеры и сеттеры ===
     public Double getUpp() { return upp; }
     public void setUpp(Double upp) throws RecException {
         check(upp, "Верхний порог");
         this.upp = upp;
     }
-
     public Double getDown() { return down; }
     public void setDown(Double down) throws RecException {
         check(down, "Нижний порог");
         this.down = down;
     }
-
     public Double getStep() { return step; }
     public void setStep(Double step) throws RecException {
         check(step, "Шаг");
         this.step = step;
     }
-
     public Double getRes() { return res; }
     public void setRes(Double res) { this.res = res; }
-    
-    private static final java.util.logging.Logger logger = 
-        java.util.logging.Logger.getLogger(RecIntegral.class.getName());
 }

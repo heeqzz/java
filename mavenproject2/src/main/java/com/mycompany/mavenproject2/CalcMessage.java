@@ -2,6 +2,9 @@ package com.mycompany.mavenproject2;
 
 import java.io.Serializable;
 
+/**
+ * Сообщение для обмена данными между сервером и клиентом.
+ */
 public class CalcMessage implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -15,7 +18,6 @@ public class CalcMessage implements Serializable {
     private double result;
     private String errorMessage;
 
-    // Конструкторы
     public CalcMessage(Type type, int taskId, double upp, double down, double step) {
         this.type = type;
         this.taskId = taskId;
@@ -36,7 +38,6 @@ public class CalcMessage implements Serializable {
         this.errorMessage = errorMessage;
     }
 
-    // Геттеры
     public Type getType() { return type; }
     public int getTaskId() { return taskId; }
     public double getUpp() { return upp; }

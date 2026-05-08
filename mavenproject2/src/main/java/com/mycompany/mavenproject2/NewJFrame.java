@@ -415,6 +415,7 @@ public class NewJFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Выберите строку для расчёта!", "Внимание", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
         if (!serverRunning) {
             JOptionPane.showMessageDialog(this, "Сначала запустите сервер и подключите клиентов (ClientApp)!", "Ошибка", JOptionPane.ERROR_MESSAGE);
             return;
@@ -431,9 +432,9 @@ public class NewJFrame extends javax.swing.JFrame {
                 collection.get(selectedRow).setRes(null);
             }
             
-            // Отправляем задачу в сетевую очередь
+            // Отправляем задачу в менеджер сервера
             serverManager.assignTask(selectedRow, upper, lower, step);
-            System.out.println("Задача #" + selectedRow + " отправлена клиентам");
+            System.out.println("Задача #" + selectedRow + " отправлена в очередь распределения.");
             
         } catch (Exception ex) {
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
